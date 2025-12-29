@@ -6,7 +6,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Unauthorized" });
     }

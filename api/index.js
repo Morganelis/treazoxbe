@@ -3,9 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import connectDB from "../config/db.js";
+import userRoutes from "../routes/userRoutes.js";
 import initAdmin from "../config/initAdmin.js";
-
-import routes from "../routes/index.js";
 
 dotenv.config();
 
@@ -13,27 +12,27 @@ const app = express();
 
 // ------------------ Database ------------------
 await connectDB();
-await initAdmin();
 
 // ------------------ Middlewares ------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use(
-//   cors({
-//     origin: "*", // later you can restrict this
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//   })
-// );
-app.use(cors())
+app.use(
+  cors({
+    origin: "*", // later restrict to frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 // ------------------ Routes ------------------
-app.use("/api", routes);
+app.use("/api/users",userRoutes );
+
+// ------------------ Admin Init ------------------
+await initAdmin();
 
 // ------------------ Health Check ------------------
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Backend running on Vercel 🚀" });
 });
 
-// IMPORTANT: no app.listen()
-export default app;
+export default app; // ESM export
