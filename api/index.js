@@ -17,10 +17,23 @@ await connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const allowedOrigins = [
+  "http://localhost:3000",             // Local Next.js frontend
+  "https://treazoxfrontend.vercel.app",  // Vercel frontend
+];
+
 app.use(
   cors({
-    origin: "*", // later restrict to frontend
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman) or from allowedOrigins
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // if you need cookies/auth
   })
 );
 
