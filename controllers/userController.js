@@ -17,7 +17,8 @@ export const signup = async (req, res) => {
     let referredBy = null;
     if (referralCode) {
       const parent = await User.findOne({ referralCode });
-      if (!parent) return res.status(400).json({ message: "Invalid referral code" });
+      if (!parent)
+        return res.status(400).json({ message: "Invalid referral code" });
       referredBy = referralCode;
     }
 

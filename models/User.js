@@ -3,18 +3,24 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
-    password: { type: String, required: true },
-    phone: { type: String, required: true },
+    fullName: String,
+    email: String,
+    password: String,
+    phone: String,
+
     referralCode: { type: String, unique: true },
-    referredBy: { type: String, default: null },
+    referredBy: { type: String, default: null }, // referralCode of parent
+
     role: { type: String, enum: ["user", "admin"], default: "user" },
-    balance: { type: Number, default: 0 },
+
+    balance: { type: Number, default: 0 },            // main wallet
+    commissionBalance: { type: Number, default: 0 },  // referral earnings
+
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
+
 
 // ✅ Use async function WITHOUT next()
 userSchema.pre("save", async function () {
