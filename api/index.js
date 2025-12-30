@@ -6,6 +6,8 @@ import connectDB from "../config/db.js";
 import userRoutes from "../routes/userRoutes.js";
 import planRoutes from "../routes/planRoutes.js";
 import investmentRoutes from "../routes/investmentRoutes.js"
+import withdrawRoutes from "../routes/withdrawRoutes.js"
+
 
 import initAdmin from "../config/initAdmin.js";
 
@@ -44,6 +46,8 @@ app.use(
 app.use("/api/users",userRoutes );
 app.use("/api/plans",planRoutes );
 app.use("/api/investment",investmentRoutes );
+app.use("/api/withdraw",withdrawRoutes );
+
 
 
 

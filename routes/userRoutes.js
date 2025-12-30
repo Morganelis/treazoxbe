@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
+router.get("/me", authMiddleware, getMe);
 router.post("/balance", authMiddleware, updateBalance);
 router.get("/admin-only", authMiddleware, adminMiddleware, (req, res) => {
   res.json({ message: "Admin access granted" });

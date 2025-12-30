@@ -70,3 +70,15 @@ export const updateBalance = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// Get current logged-in user
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
