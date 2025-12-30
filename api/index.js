@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 
 import connectDB from "../config/db.js";
 import userRoutes from "../routes/userRoutes.js";
+import planRoutes from "../routes/planRoutes.js";
+
 import initAdmin from "../config/initAdmin.js";
 
 dotenv.config();
@@ -39,6 +41,8 @@ app.use(
 
 // ------------------ Routes ------------------
 app.use("/api/users",userRoutes );
+app.use("/api/plans",planRoutes );
+
 
 // ------------------ Admin Init ------------------
 await initAdmin();
