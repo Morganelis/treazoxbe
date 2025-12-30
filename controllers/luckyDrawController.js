@@ -141,3 +141,37 @@ const pickWinners = async (drawId) => {
     console.error("Pick winner error:", err.message);
   }
 };
+
+
+
+
+export const getLuckyDrawWinHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const draws = await LuckyDraw.find({
+      "winners.userId": userId,
+    })
+      .populate("winners.userId", "fullName email")
+      .sort({ updatedAt: -1 });
+
+    const wins = [];
+
+    draws.forEach((d) => {
+      d.winners.forEach((w) => {
+        if (w.userId._id.toString() === userId.toString()) {
+          wins.push({
+            drawId: d._id,
+            wonAmount: w.wonAmount,
+            drawStatus: d.status,
+            date: d.updatedAt,
+          });
+        }
+      });
+    });
+
+    res.json({ success: true, wins });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

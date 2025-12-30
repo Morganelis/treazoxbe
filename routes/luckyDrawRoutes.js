@@ -5,6 +5,7 @@ import {
   deleteLuckyDraw,
   getActiveLuckyDraws,
   participateLuckyDraw,
+  getLuckyDrawWinHistory
 } from "../controllers/luckyDrawController.js";
 
 import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
@@ -18,7 +19,7 @@ router.delete("/:id", authMiddleware, adminMiddleware, deleteLuckyDraw);
 
 /* ===== User ===== */
 router.get("/", authMiddleware, getActiveLuckyDraws);
-
+router.get("/wins", authMiddleware, getLuckyDrawWinHistory);
 router.post("/participate/:drawId", authMiddleware, participateLuckyDraw);
 
 export default router;

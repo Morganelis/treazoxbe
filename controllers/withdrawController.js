@@ -70,3 +70,18 @@ export const updateWithdrawStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to update withdraw status" });
   }
 };
+
+
+
+export const getWithdrawHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const withdraws = await Withdraw.find({ user: userId })
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, withdraws });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
