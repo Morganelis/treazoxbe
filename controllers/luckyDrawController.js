@@ -98,26 +98,46 @@ export const participateLuckyDraw = async (req, res) => {
 
 /* ================= SYSTEM ================= */
 
+/* ================= SYSTEM ================= */
+
 const pickWinners = async (drawId) => {
-  const draw = await LuckyDraw.findById(drawId).populate("participants.userId");
-  if (!draw) return;
+  try {
+    const draw = await LuckyDraw.findById(drawId).populate("participants.userId");
+    if (!draw) return;
 
-  const shuffled = draw.participants.sort(() => 0.5 - Math.random());
-  const winners = shuffled.slice(0, draw.winnersCount);
+    // Ensure participants exist
+    if (!draw.participants.length) return;
 
-  const prizePerWinner = draw.winningPrice / draw.winnersCount;
+    const winnersCount = Math.min(draw.winnersCount, draw.participants.length);
+    const participantsCopy = [...draw.participants];
 
-  for (const w of winners) {
-    draw.winners.push({
-      userId: w.userId._id,
-      wonAmount: prizePerWinner,
-    });
+    const winners = [];
 
-    await User.findByIdAndUpdate(w.userId._id, {
-      $inc: { balance: prizePerWinner },
-    });
+    // Randomly pick winners
+    for (let i = 0; i < winnersCount; i++) {
+      const randomIndex = Math.floor(Math.random() * participantsCopy.length);
+      const winner = participantsCopy.splice(randomIndex, 1)[0]; // remove selected
+      winners.push(winner);
+    }
+
+    const prizePerWinner = draw.winningPrice / winnersCount;
+
+    // Update winners array and their balances
+    for (const w of winners) {
+      draw.winners.push({
+        userId: w.userId._id,
+        wonAmount: prizePerWinner,
+      });
+
+      await User.findByIdAndUpdate(w.userId._id, {
+        $inc: { balance: prizePerWinner },
+      });
+    }
+
+    // Mark draw as completed
+    draw.status = "completed";
+    await draw.save();
+  } catch (err) {
+    console.error("Pick winner error:", err.message);
   }
-
-  draw.status = "completed";
-  await draw.save();
 };
