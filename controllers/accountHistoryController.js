@@ -44,15 +44,15 @@ export const getAccountHistory = async (req, res) => {
     });
 
     // Investments
-    investments.forEach((i) => {
-      history.push({
-        type: "investment",
-        amount: i.amount,
-        status: i.status,
-        description: "Investment created",
-        createdAt: i.createdAt,
-      });
-    });
+    // investments.forEach((i) => {
+    //   history.push({
+    //     type: "investment",
+    //     amount: i.amount,
+    //     status: i.status,
+    //     description: "Investment created",
+    //     createdAt: i.createdAt,
+    //   });
+    // });
 
     // Lucky draw join (payment)
     luckyDraws.forEach((d) => {
