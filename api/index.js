@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import connectDB from "../config/db.js";
 import userRoutes from "../routes/userRoutes.js";
 import planRoutes from "../routes/planRoutes.js";
+import investmentRoutes from "../routes/investmentRoutes.js"
 
 import initAdmin from "../config/initAdmin.js";
 
@@ -42,6 +43,8 @@ app.use(
 // ------------------ Routes ------------------
 app.use("/api/users",userRoutes );
 app.use("/api/plans",planRoutes );
+app.use("/api/investment",investmentRoutes );
+
 
 
 // ------------------ Admin Init ------------------
