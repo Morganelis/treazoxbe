@@ -15,6 +15,6 @@ router.post("/", authMiddleware, submitDeposit);
 router.get("/", authMiddleware, adminMiddleware, getAllDeposits);
 
 // Admin updates deposit status
-router.patch("/:id", authMiddleware, adminMiddleware, updateDepositStatus);
+router.put("/:id", authMiddleware, adminMiddleware, updateDepositStatus);
 
 export default router;
