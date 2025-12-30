@@ -8,6 +8,7 @@ import planRoutes from "../routes/planRoutes.js";
 import investmentRoutes from "../routes/investmentRoutes.js"
 import withdrawRoutes from "../routes/withdrawRoutes.js"
 import depositRoutes from "../routes/depositRoutes.js"
+import luckyDrawRoutes from "../routes/luckyDrawRoutes.js"
 
 
 
@@ -50,6 +51,8 @@ app.use("/api/plans",planRoutes );
 app.use("/api/investment",investmentRoutes );
 app.use("/api/withdraw",withdrawRoutes );
 app.use("/api/deposit",depositRoutes );
+app.use("/api/luckydraw",luckyDrawRoutes );
+
 
 
 
