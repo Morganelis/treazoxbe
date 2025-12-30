@@ -52,6 +52,100 @@ export const login = async (req, res) => {
   }
 };
 
+
+
+
+// ====================== Admin User Management ======================
+
+// Get all users (Admin)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json({ success: true, users });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Create user (Admin)
+export const createUser = async (req, res) => {
+  try {
+    const { fullName, email, password, phone, role } = req.body;
+
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ message: "Email already exists" });
+
+    const user = await User.create({
+      fullName,
+      email,
+      password,
+      phone,
+      role: role || "user",
+      referralCode: generateReferralCode(),
+    });
+
+    res.status(201).json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Update user (Admin)
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName, email, phone, role } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (fullName) user.fullName = fullName;
+    if (email) user.email = email;
+    if (phone) user.phone = phone;
+    if (role) user.role = role;
+
+    await user.save();
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Delete user (Admin)
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ success: true, message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Change user password (Admin)
+export const changeUserPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) return res.status(400).json({ message: "New password is required" });
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
 export const updateBalance = async (req, res) => {
   try {
     const { amount, type } = req.body;
