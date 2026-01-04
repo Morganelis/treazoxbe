@@ -45,3 +45,10 @@ export const runDailyEarnings = async (req, res) => {
     res.status(500).json({ success: false, message: "Daily earning failed" });
   }
 };
+
+
+
+
+
+
+// https://treazoxbackend.vercel.app/api/cron/daily-earnings
