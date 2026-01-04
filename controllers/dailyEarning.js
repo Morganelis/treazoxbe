@@ -1,5 +1,6 @@
 import Investment from "../models/Investment.js";
 import User from "../models/User.js";
+import { distributeReferralCommission } from "../utils/referralCommission.js";
 
 export const runDailyEarnings = async (req, res) => {
   try {
@@ -27,6 +28,8 @@ export const runDailyEarnings = async (req, res) => {
       user.balance += inv.dailyEarning;
       await user.save();
 
+// ✅ Distribute referral commission from DAILY earning
+       await distributeReferralCommission(user, inv.dailyEarning);
       // Update investment
       inv.duration -= 1;
       inv.lastEarningAt = now;
