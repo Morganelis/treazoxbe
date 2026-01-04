@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import Investment from "../models/Investment.js";
+import Plan from "../models/Plan.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -224,5 +226,27 @@ export const getTeam = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+
+export const getMyActiveInvestments = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Fetch investments of this user that are approved and not completed
+    const investments = await Investment.find({
+      user: userId,
+      status: "approved",      // only approved
+      duration: { $gt: 0 },    // remaining duration > 0
+    })
+      .populate("plan", "totalPrice duration dailyEarning") // include plan details
+      .sort({ startDate: -1 }); // optional: newest first
+
+    res.status(200).json({ success: true, investments });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to fetch investments" });
   }
 };

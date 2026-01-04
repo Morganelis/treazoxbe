@@ -3,7 +3,7 @@ import { signup, login, updateBalance,getMe ,  getAllUsers,
   createUser,
   updateUser,
   deleteUser,
-  changeUserPassword, getTeam,} from "../controllers/userController.js";
+  changeUserPassword, getTeam,getMyActiveInvestments} from "../controllers/userController.js";
 import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -16,6 +16,7 @@ router.put("/admin/:id", authMiddleware, adminMiddleware, updateUser);
 router.delete("/admin/:id", authMiddleware, adminMiddleware, deleteUser);
 router.put("/admin/:id/password", authMiddleware, adminMiddleware, changeUserPassword);
 router.get("/me", authMiddleware, getMe);
+router.get("/myinvestments", authMiddleware, getMyActiveInvestments);
 router.get("/team", authMiddleware, getTeam);
 router.post("/balance", authMiddleware, updateBalance);
 router.get("/admin-only", authMiddleware, adminMiddleware, (req, res) => {
