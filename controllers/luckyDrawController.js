@@ -6,13 +6,12 @@ import User from "../models/User.js";
 // Create Lucky Draw
 export const createLuckyDraw = async (req, res) => {
   try {
-    const { buyPrice, winningPrice, participantsLimit, winnersCount, endDate } = req.body;
+    const { buyPrice, winningPrice, participantsLimit, endDate } = req.body;
 
     const draw = await LuckyDraw.create({
       buyPrice,
       winningPrice,
       participantsLimit,
-      winnersCount,
       endDate,
     });
 
@@ -45,9 +44,10 @@ export const deleteLuckyDraw = async (req, res) => {
 
 // Get active lucky draws
 export const getActiveLuckyDraws = async (req, res) => {
-  const draws = await LuckyDraw.find({ status: "active" })
-    .populate("participants.userId", "fullName")
-    .populate("winners.userId", "fullName");
+  const draws = await LuckyDraw.find({
+    status: "active",
+    endDate: { $gte: new Date() },
+  });
 
   res.json({ success: true, draws });
 };
@@ -62,7 +62,10 @@ export const participateLuckyDraw = async (req, res) => {
     if (!draw) return res.status(404).json({ message: "Draw not found" });
 
     if (draw.status === "completed")
-      return res.status(400).json({ message: "Draw already ended" });
+      return res.status(400).json({ message: "Draw already completed" });
+
+    if (new Date() > draw.endDate)
+      return res.status(400).json({ message: "Draw expired" });
 
     if (draw.participants.length >= draw.participantsLimit)
       return res.status(400).json({ message: "Draw is full" });
@@ -74,20 +77,20 @@ export const participateLuckyDraw = async (req, res) => {
       return res.status(400).json({ message: "Already participated" });
 
     const user = await User.findById(userId);
-    if (user.balance < draw.buyPrice)
+    if (!user || user.balance < draw.buyPrice)
       return res.status(400).json({ message: "Insufficient balance" });
 
-    // Deduct balance
+    // 💳 Deduct buy price
     user.balance -= draw.buyPrice;
     await user.save();
 
-    // Add participant
+    // ➕ Add participant
     draw.participants.push({ userId });
     await draw.save();
 
-    // Auto pick winner if full
+    // 🎯 Auto pick winner when full
     if (draw.participants.length === draw.participantsLimit) {
-      await pickWinners(draw._id);
+      await pickWinner(draw._id);
     }
 
     res.json({ success: true, message: "Participation successful" });
@@ -98,43 +101,31 @@ export const participateLuckyDraw = async (req, res) => {
 
 /* ================= SYSTEM ================= */
 
-/* ================= SYSTEM ================= */
-
-const pickWinners = async (drawId) => {
+// 🔥 PICK ONLY ONE WINNER
+const pickWinner = async (drawId) => {
   try {
-    const draw = await LuckyDraw.findById(drawId).populate("participants.userId");
-    if (!draw) return;
+    const draw = await LuckyDraw.findById(drawId);
+    if (!draw || draw.status === "completed") return;
 
-    // Ensure participants exist
-    if (!draw.participants.length) return;
+    if (draw.participants.length < draw.participantsLimit) return;
 
-    const winnersCount = Math.min(draw.winnersCount, draw.participants.length);
-    const participantsCopy = [...draw.participants];
+    // 🎯 Random winner
+    const randomIndex = Math.floor(Math.random() * draw.participants.length);
+    const winnerParticipant = draw.participants[randomIndex];
 
-    const winners = [];
+    // Save winner
+    draw.winners = [
+      {
+        userId: winnerParticipant.userId,
+        wonAmount: draw.winningPrice,
+      },
+    ];
 
-    // Randomly pick winners
-    for (let i = 0; i < winnersCount; i++) {
-      const randomIndex = Math.floor(Math.random() * participantsCopy.length);
-      const winner = participantsCopy.splice(randomIndex, 1)[0]; // remove selected
-      winners.push(winner);
-    }
+    // 💰 Credit winner balance
+    await User.findByIdAndUpdate(winnerParticipant.userId, {
+      $inc: { balance: draw.winningPrice },
+    });
 
-    const prizePerWinner = draw.winningPrice / winnersCount;
-
-    // Update winners array and their balances
-    for (const w of winners) {
-      draw.winners.push({
-        userId: w.userId._id,
-        wonAmount: prizePerWinner,
-      });
-
-      await User.findByIdAndUpdate(w.userId._id, {
-        $inc: { balance: prizePerWinner },
-      });
-    }
-
-    // Mark draw as completed
     draw.status = "completed";
     await draw.save();
   } catch (err) {
@@ -142,28 +133,23 @@ const pickWinners = async (drawId) => {
   }
 };
 
-
-
-
+// User win history
 export const getLuckyDrawWinHistory = async (req, res) => {
   try {
     const userId = req.user._id;
 
     const draws = await LuckyDraw.find({
       "winners.userId": userId,
-    })
-      .populate("winners.userId", "fullName email")
-      .sort({ updatedAt: -1 });
+    }).sort({ updatedAt: -1 });
 
     const wins = [];
 
     draws.forEach((d) => {
       d.winners.forEach((w) => {
-        if (w.userId._id.toString() === userId.toString()) {
+        if (w.userId.toString() === userId.toString()) {
           wins.push({
             drawId: d._id,
             wonAmount: w.wonAmount,
-            drawStatus: d.status,
             date: d.updatedAt,
           });
         }

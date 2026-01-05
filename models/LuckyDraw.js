@@ -14,10 +14,6 @@ const luckyDrawSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    winnersCount: {
-      type: Number,
-      default: 1,
-    },
 
     participants: [
       {
@@ -56,4 +52,5 @@ const luckyDrawSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("LuckyDraw", luckyDrawSchema);
+export default mongoose.models.LuckyDraw ||
+  mongoose.model("LuckyDraw", luckyDrawSchema);
