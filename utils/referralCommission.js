@@ -1,15 +1,14 @@
 import User from "../models/User.js";
 
 export const distributeReferralCommission = async (buyer, amount) => {
-  // LEVEL 1 – 10%
-  if (!buyer.referredBy) return;
-
+  // LEVEL 1 – 8%
+ if (!buyer.referredBy) return;
   const level1 = await User.findOne({ referralCode: buyer.referredBy });
   if (!level1) return;
 
-  const lvl1Amount = amount * 0.1;
-  level1.balance += lvl1Amount;           // actually usable
-  level1.commissionBalance += lvl1Amount; // for display
+  const lvl1Amount = amount * 0.08; // 🔹 8%
+  level1.balance += lvl1Amount;            // usable balance
+  level1.commissionBalance += lvl1Amount;  // display only
   await level1.save();
 
   // LEVEL 2 – 4%

@@ -4,14 +4,34 @@ import Plan from "../models/Plan.js";
 import { distributeReferralCommission } from "../utils/referralCommission.js";
 
 // USER CREATE INVESTMENT
+// USER CREATE INVESTMENT (BUY FROM BALANCE)
 export const createInvestment = async (req, res) => {
   try {
-    const { planId, trxId, exchange } = req.body;
+    const { planId, exchange } = req.body;
     const userId = req.user._id;
 
+    // 1️⃣ Fetch plan
     const plan = await Plan.findById(planId);
-    if (!plan) return res.status(404).json({ message: "Plan not found" });
+    if (!plan)
+      return res.status(404).json({ message: "Plan not found" });
 
+    // 2️⃣ Fetch user
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
+
+    // 3️⃣ Check balance
+    if (user.balance < plan.totalPrice) {
+      return res.status(400).json({
+        message: "Insufficient balance",
+      });
+    }
+
+    // 4️⃣ Deduct balance
+    user.balance -= plan.totalPrice;
+    await user.save();
+
+    // 5️⃣ Create investment
     const investment = await Investment.create({
       user: userId,
       plan: plan._id,
@@ -19,14 +39,21 @@ export const createInvestment = async (req, res) => {
       duration: plan.duration,
       dailyEarning: plan.dailyEarning,
       exchange,
-      trxId,
+      trxId: `BAL-${Date.now()}`, // auto trx id
+      status: "pending",
     });
 
-    res.status(201).json({ success: true, investment });
+    res.status(201).json({
+      success: true,
+      message: "Investment created successfully",
+      investment,
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Failed to create investment" });
   }
 };
+
 
 // ADMIN GET ALL
 export const getAllInvestments = async (req, res) => {
