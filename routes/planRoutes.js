@@ -8,6 +8,8 @@ const router = express.Router();
 // ----- Admin Routes -----
 router.post("/", authMiddleware, adminMiddleware, createPlan);
 router.get("/", authMiddleware, adminMiddleware, getPlans);
+router.get("/withoutlogin", getPlans);
+
 router.put("/", authMiddleware, adminMiddleware, updatePlan);
 router.delete("/", authMiddleware, adminMiddleware, deletePlan);
 
