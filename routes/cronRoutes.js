@@ -6,6 +6,6 @@ import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js
 const router = express.Router();
 
 // This will be called by cron
-router.post("/daily-earnings", runDailyEarnings );
+router.get("/daily-earnings", runDailyEarnings );
 
 export default router;

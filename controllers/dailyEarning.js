@@ -5,37 +5,36 @@ import { distributeDailyEarningCommission } from "../utils/dailyEarningCommissio
 
 export const runDailyEarnings = async (req, res) => {
   try {
+    console.log("🔥 Daily earnings cron started", new Date());
+
     const now = new Date();
 
-    // Get all active approved investments
     const investments = await Investment.find({
       status: "approved",
       duration: { $gt: 0 },
     });
 
+    console.log("📊 Active investments:", investments.length);
+
     for (const inv of investments) {
-      // Check 24 hours gap
       if (inv.lastEarningAt) {
         const diffHours =
           (now - new Date(inv.lastEarningAt)) / (1000 * 60 * 60);
 
-        if (diffHours < 24) continue; // skip if not 24h passed
+        if (diffHours < 24) continue;
       }
 
-      // Credit user
       const user = await User.findById(inv.user);
       if (!user) continue;
 
       user.balance += inv.dailyEarning;
       await user.save();
 
-// ✅ Distribute referral commission from DAILY earning
-       await distributeDailyEarningCommission(user, inv.dailyEarning);
-      // Update investment
+      await distributeDailyEarningCommission(user, inv.dailyEarning);
+
       inv.duration -= 1;
       inv.lastEarningAt = now;
 
-      // If duration finished
       if (inv.duration === 0) {
         inv.status = "completed";
       }
@@ -43,12 +42,15 @@ export const runDailyEarnings = async (req, res) => {
       await inv.save();
     }
 
+    console.log("✅ Daily earnings completed");
+
     res.json({ success: true, message: "Daily earnings processed" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Daily earning failed" });
+    console.error("❌ Daily earning failed:", error);
+    res.status(500).json({ success: false });
   }
 };
+
 
 
 
