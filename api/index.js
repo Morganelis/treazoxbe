@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
   "http://localhost:3000",             // Local Next.js frontend
-  "https://www.treazox.com",  // Vercel frontend
+  "https://treazox-ten.vercel.app/",  // Vercel frontend
 ];
 
 app.use(
