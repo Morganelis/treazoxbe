@@ -54,3 +54,26 @@ export const createInvestment = async (req, res) => {
     });
   }
 }; // ✅ THIS WAS MISSING
+
+
+
+export const getAllInvestments = async (req, res) => {
+  try {
+    const investments = await Investment.find()
+      .populate("user", "name email balance") // adjust fields if needed
+      .populate("plan", "name totalPrice duration dailyEarning")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      total: investments.length,
+      investments,
+    });
+  } catch (err) {
+    console.error("FETCH ALL INVESTMENTS ERROR 👉", err);
+    res.status(500).json({
+      message: "Failed to fetch investments",
+      error: err.message,
+    });
+  }
+};
