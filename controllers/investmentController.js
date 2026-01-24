@@ -1,6 +1,6 @@
-import Investment from "../models/Investment";
-import User from "../models/User";
-import Plan from "../models/Plan";
+import Investment from "../models/Investment.js";
+import User from "../models/User.js";
+import Plan from "../models/Plan.js";
 export const createInvestment = async (req, res) => {
   try {
     const { planId } = req.body; // ❌ exchange removed
