@@ -14,3 +14,4 @@ router.post("/", authMiddleware, createInvestment); // Create investment request
 // router.put("/status", authMiddleware, adminMiddleware, updateInvestmentStatus); // Approve / reject
 
 export default router;
+// new changes
