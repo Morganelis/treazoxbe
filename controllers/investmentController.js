@@ -54,8 +54,12 @@ export const createInvestment = async (req, res) => {
       message: "Investment started successfully",
       investment,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to create investment" });
-  }
-};
+  } } catch (err) {
+  console.error("CREATE INVESTMENT ERROR 👉", err);
+  res.status(500).json({
+    message: "Failed to create investment",
+    error: err.message,          // 👈 add this
+    stack: err.stack,            // 👈 add this (for dev)
+  });
+}
+
