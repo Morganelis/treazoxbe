@@ -1,6 +1,6 @@
 export const createInvestment = async (req, res) => {
   try {
-    const { planId, exchange } = req.body;
+    const { planId } = req.body; // ❌ exchange removed
     const userId = req.user._id;
 
     // 1️⃣ Fetch plan
@@ -20,7 +20,7 @@ export const createInvestment = async (req, res) => {
       return res.status(400).json({ message: "Insufficient balance" });
     }
 
-    // 4️⃣ Deduct balance immediately
+    // 4️⃣ Deduct balance
     user.balance -= plan.totalPrice;
     await user.save();
 
@@ -29,22 +29,21 @@ export const createInvestment = async (req, res) => {
       Date.now() + plan.duration * 24 * 60 * 60 * 1000
     );
 
-    // 5️⃣ Create investment (AUTO APPROVED)
+    // 5️⃣ Create investment (AUTO START)
     const investment = await Investment.create({
       user: userId,
       plan: plan._id,
       price: plan.totalPrice,
       duration: plan.duration,
       dailyEarning: plan.dailyEarning,
-      exchange,
-      trxId: `BAL-${Date.now()}`,
+      trxId: `WALLET-${Date.now()}`, // 🔥 internal wallet trx
       status: "approved",
       startDate,
       endDate,
       lastEarningAt: null,
     });
 
-    // 6️⃣ Distribute referral commission immediately
+    // 6️⃣ Distribute referral commission
     await distributeReferralCommission(user, plan.totalPrice);
 
     res.status(201).json({
