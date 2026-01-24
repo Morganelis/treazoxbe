@@ -44,10 +44,11 @@ const luckyDrawSchema = new mongoose.Schema(
       default: "active",
     },
 
-    endDate: {
-      type: Date,
-      required: true,
-    },
+   endDate: {
+  type: Date,
+  required: false, // now optional
+},
+
   },
   { timestamps: true }
 );

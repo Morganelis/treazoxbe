@@ -45,10 +45,12 @@ export const deleteLuckyDraw = async (req, res) => {
 // Get active lucky draws
 export const getActiveLuckyDraws = async (req, res) => {
   const draws = await LuckyDraw.find({
-    status: "active",
-    endDate: { $gte: new Date() },
-  });
-
+  status: "active",
+  $or: [
+    { endDate: { $exists: false } },   // no end date
+    { endDate: { $gte: new Date() } }, // or end date is future
+  ],
+});
   res.json({ success: true, draws });
 };
 
