@@ -95,10 +95,10 @@ export const getWithdrawDashboardStats = async (req, res) => {
     const [
       totalWithdraw,
       pendingWithdraws,
-      approvedWithdraws,
+      processingWithdraws,
+      completedWithdraws,
       rejectedWithdraws,
     ] = await Promise.all([
-      // Total amount requested (all withdraws)
       Withdraw.aggregate([
         {
           $group: {
@@ -108,13 +108,9 @@ export const getWithdrawDashboardStats = async (req, res) => {
         },
       ]),
 
-      // Pending count
       Withdraw.countDocuments({ status: "pending" }),
-
-      // Approved count
-      Withdraw.countDocuments({ status: "approved" }),
-
-      // Rejected count
+      Withdraw.countDocuments({ status: "processing" }),
+      Withdraw.countDocuments({ status: "completed" }),
       Withdraw.countDocuments({ status: "rejected" }),
     ]);
 
@@ -122,7 +118,8 @@ export const getWithdrawDashboardStats = async (req, res) => {
       success: true,
       totalWithdrawAmount: totalWithdraw[0]?.totalAmount || 0,
       pendingWithdraws,
-      approvedWithdraws,
+      processingWithdraws,
+      completedWithdraws,
       rejectedWithdraws,
     });
   } catch (err) {
