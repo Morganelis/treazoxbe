@@ -282,3 +282,29 @@ export const uploadUserAvatar = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+export const getAdminUserStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ isActive: true });
+    const inactiveUsers = await User.countDocuments({ isActive: false });
+
+    // Users with active investments
+    const activeInvestmentUsers = await Investment.distinct("user", {
+      status: "approved",
+      duration: { $gt: 0 },
+    });
+
+    res.status(200).json({
+      success: true,
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      usersWithActiveInvestments: activeInvestmentUsers.length,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

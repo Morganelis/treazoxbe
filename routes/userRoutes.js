@@ -3,7 +3,7 @@ import { signup, login, updateBalance,getMe ,  getAllUsers,
   createUser,
   updateUser,
   deleteUser,
-  changeUserPassword, getTeam,getMyActiveInvestments,uploadUserAvatar} from "../controllers/userController.js";
+  changeUserPassword, getTeam,getMyActiveInvestments,uploadUserAvatar,getAdminUserStats} from "../controllers/userController.js";
 import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
 import { uploadAvatar } from "../middleware/uploadAvatar.js";
 
@@ -18,6 +18,8 @@ router.put(
   uploadUserAvatar
 );
 router.get("/admin", authMiddleware, adminMiddleware, getAllUsers);
+router.get("/admin/dashboard/stats", authMiddleware, adminMiddleware, getAdminUserStats);
+
 router.post("/admin", authMiddleware, adminMiddleware, createUser);
 router.put("/admin/:id", authMiddleware, adminMiddleware, updateUser);
 router.delete("/admin/:id", authMiddleware, adminMiddleware, deleteUser);
