@@ -163,3 +163,50 @@ export const getLuckyDrawWinHistory = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+export const getLuckyDrawDashboardStats = async (req, res) => {
+  try {
+    const [
+      totalLuckyDraws,
+      activeLuckyDraws,
+      completedLuckyDraws,
+      participantStats,
+    ] = await Promise.all([
+      LuckyDraw.countDocuments(),
+      LuckyDraw.countDocuments({ status: "active" }),
+      LuckyDraw.countDocuments({ status: "completed" }),
+
+      // Sum of all participants across draws
+      LuckyDraw.aggregate([
+        {
+          $project: {
+            participantsCount: { $size: "$participants" },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalParticipants: { $sum: "$participantsCount" },
+          },
+        },
+      ]),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      totalLuckyDraws,
+      activeLuckyDraws,
+      completedLuckyDraws,
+      totalParticipants: participantStats[0]?.totalParticipants || 0,
+    });
+  } catch (err) {
+    console.error("LUCKY DRAW DASHBOARD STATS ERROR 👉", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch lucky draw stats",
+      error: err.message,
+    });
+  }
+};

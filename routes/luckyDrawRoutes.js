@@ -5,7 +5,8 @@ import {
   deleteLuckyDraw,
   getActiveLuckyDraws,
   participateLuckyDraw,
-  getLuckyDrawWinHistory
+  getLuckyDrawWinHistory,
+  getLuckyDrawDashboardStats
 } from "../controllers/luckyDrawController.js";
 
 import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
@@ -16,6 +17,8 @@ const router = express.Router();
 router.post("/", authMiddleware, adminMiddleware, createLuckyDraw);
 router.get("/admin", authMiddleware, adminMiddleware, getAllLuckyDrawsAdmin);
 router.delete("/:id", authMiddleware, adminMiddleware, deleteLuckyDraw);
+router.get("/admin/dashboard/stats", authMiddleware, adminMiddleware, getLuckyDrawDashboardStats);
+
 
 /* ===== User ===== */
 router.get("/", authMiddleware, getActiveLuckyDraws);
