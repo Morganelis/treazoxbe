@@ -77,3 +77,41 @@ export const getAllInvestments = async (req, res) => {
     });
   }
 };
+
+
+
+
+export const getAdminDashboardStats = async (req, res) => {
+  try {
+    const [
+      investmentStats,
+      activeInvestments,
+    ] = await Promise.all([
+      Investment.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalInvestmentAmount: { $sum: "$price" },
+            totalInvestments: { $sum: 1 },
+          },
+        },
+      ]),
+      Investment.countDocuments({ status: "approved" }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      totalInvestmentAmount:
+        investmentStats[0]?.totalInvestmentAmount || 0,
+      totalInvestments:
+        investmentStats[0]?.totalInvestments || 0,
+      activeInvestments,
+    });
+  } catch (err) {
+    console.error("ADMIN DASHBOARD STATS ERROR 👉", err);
+    res.status(500).json({
+      message: "Failed to fetch dashboard stats",
+      error: err.message,
+    });
+  }
+};
