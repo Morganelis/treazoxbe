@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import Investment from "../models/Investment.js";
 import Plan from "../models/Plan.js";
+import LuckyDraw from "../models/LuckyDraw.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -303,6 +304,47 @@ export const getAdminUserStats = async (req, res) => {
       activeUsers,
       inactiveUsers,
       usersWithActiveInvestments: activeInvestmentUsers.length,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+
+export const getAdminOverview = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ isActive: true });
+
+    // Total Investment Amount
+    const totalInvestment = await Investment.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$price" }
+        }
+      }
+    ]);
+
+    const totalInvestmentsAmount = totalInvestment[0]?.total || 0;
+
+    // Users with Active Investments
+    const activeInvestmentUsers = await Investment.distinct("user", {
+      status: "approved",
+      duration: { $gt: 0 }
+    });
+
+    // Lucky Draw Participation
+    const luckyDrawParticipation = await LuckyDraw.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      totalUsers,
+      activeUsers,
+      totalInvestmentsAmount,
+      usersWithActiveInvestments: activeInvestmentUsers.length,
+      luckyDrawParticipation
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
