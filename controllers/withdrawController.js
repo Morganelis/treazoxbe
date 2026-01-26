@@ -85,3 +85,52 @@ export const getWithdrawHistory = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+
+
+export const getWithdrawDashboardStats = async (req, res) => {
+  try {
+    const [
+      totalWithdraw,
+      pendingWithdraws,
+      approvedWithdraws,
+      rejectedWithdraws,
+    ] = await Promise.all([
+      // Total amount requested (all withdraws)
+      Withdraw.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+      ]),
+
+      // Pending count
+      Withdraw.countDocuments({ status: "pending" }),
+
+      // Approved count
+      Withdraw.countDocuments({ status: "approved" }),
+
+      // Rejected count
+      Withdraw.countDocuments({ status: "rejected" }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      totalWithdrawAmount: totalWithdraw[0]?.totalAmount || 0,
+      pendingWithdraws,
+      approvedWithdraws,
+      rejectedWithdraws,
+    });
+  } catch (err) {
+    console.error("WITHDRAW DASHBOARD STATS ERROR 👉", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch withdraw stats",
+      error: err.message,
+    });
+  }
+};

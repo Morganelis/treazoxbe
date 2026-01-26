@@ -4,7 +4,8 @@ import {
   createWithdraw,
   getAllWithdraws,
   updateWithdrawStatus,
-  getWithdrawHistory
+  getWithdrawHistory,
+  getWithdrawDashboardStats
 } from "../controllers/withdrawController.js";
 
 const router = express.Router();
@@ -14,6 +15,8 @@ router.post("/", authMiddleware, createWithdraw);
 router.get("/history", authMiddleware, getWithdrawHistory);
 // Admin routes
 router.get("/", authMiddleware, adminMiddleware, getAllWithdraws);
+router.get("/admin/dashboard/stats", authMiddleware, adminMiddleware, getWithdrawDashboardStats);
+
 router.put("/status", authMiddleware, adminMiddleware, updateWithdrawStatus);
 
 
