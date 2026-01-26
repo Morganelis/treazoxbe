@@ -52,3 +52,50 @@ export const deletePlan = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete plan" });
   }
 };
+
+
+export const getPlanStats = async (req, res) => {
+  try {
+    const stats = await Plan.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalPlans: { $sum: 1 },
+          activePlans: {
+            $sum: {
+              $cond: [{ $eq: ["$isActive", true] }, 1, 0],
+            },
+          },
+          inactivePlans: {
+            $sum: {
+              $cond: [{ $eq: ["$isActive", false] }, 1, 0],
+            },
+          },
+          avgDailyEarning: { $avg: "$dailyEarning" },
+          totalDailyEarning: { $sum: "$dailyEarning" },
+        },
+      },
+    ]);
+
+    const result = stats[0] || {
+      totalPlans: 0,
+      activePlans: 0,
+      inactivePlans: 0,
+      avgDailyEarning: 0,
+      totalDailyEarning: 0,
+    };
+
+    res.status(200).json({
+      success: true,
+      stats: result,
+    });
+  } catch (error) {
+    console.error("Plan Stats Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch plan stats",
+      error: error.message,
+    });
+  }
+};
+
