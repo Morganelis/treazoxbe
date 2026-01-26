@@ -63,3 +63,49 @@ export const updateDepositStatus = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+export const getAdminDepositStats = async (req, res) => {
+  try {
+    const depositStats = await Deposit.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          totalAmount: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Default values
+    let totalDepositAmount = 0;
+    let pendingDeposits = 0;
+    let approvedDeposits = 0;
+    let rejectedDeposits = 0;
+
+    // Assign values based on status
+    depositStats.forEach((item) => {
+      totalDepositAmount += item.totalAmount;
+
+      if (item._id === "pending") pendingDeposits = item.totalAmount;
+      if (item._id === "approved") approvedDeposits = item.totalAmount;
+      if (item._id === "rejected") rejectedDeposits = item.totalAmount;
+    });
+
+    res.status(200).json({
+      success: true,
+      totalDepositAmount,
+      pendingDeposits,
+      approvedDeposits,
+      rejectedDeposits,
+    });
+  } catch (err) {
+    console.error("DEPOSIT DASHBOARD ERROR 👉", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch deposit stats",
+      error: err.message,
+    });
+  }
+};
